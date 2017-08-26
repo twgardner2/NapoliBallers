@@ -5,21 +5,43 @@ date: "August 26, 2017"
 output: html_document
 ---
 
+<link rel="stylesheet" type="text/css" href="http://cdn.datatables.net/1.10.5/css/jquery.dataTables.min.css">
+<script src="http://code.jquery.com/jquery-2.1.2.min.js"></script>
+<script src="http://cdn.datatables.net/1.10.5/js/jquery.dataTables.min.js"></script>
+
+<style>
+  table.dataTable tbody tr.strip1 {
+      background-color: #f2f2f2;
+  }
+  table.dataTable tbody tr.strip2 {
+      background-color: #ffffff;
+  }
+</style>
+
+<script type="text/javascript">
+         $(document).ready(function() {
+             $("#rawdata").DataTable({"pageLength":10,
+                                      "stripeClasses": ['strip1', 'strip2']
+                                   });
+                                   
+            $("#ownertable").DataTable({"pageLength":50,
+                                        "bPaginate": false,
+                                        "stripeClasses": ['strip1', 'strip2']
+                                   });         
+         } );
+</script>
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+options(knitr.table.format = "html") 
 
-library(sjPlot)
+library(kableExtra)
 library(readxl)
 library(stringr)
 library(ggplot2)
 library(tidyverse)
-```
+library(knitr)
 
-## Data
-
-For the 8th season of the Napoli Ballers Fantasy Football League, I figured I'd go back and run some numbers on the first 7 years of the league. I scraped this data from our [historical expanded standings](http://games.espn.com/ffl/tools/finalstandings?leagueId=725705&seasonId=2016). The raw data file is [here](https://github.com/twgardner2/NapoliBallers/blob/master/NapoliBallersHistory.xlsx).
-
-```{r data}
 # Read in raw data
 data <- readxl::read_xlsx("NapoliBallersHistory.xlsx")
 
@@ -28,28 +50,31 @@ names(data) <- str_to_lower(names(data))
 names(data)[names(data) == 'pf/g'] <- "pfPerGame"
 names(data)[names(data) == 'pa/g'] <- "paPerGame"
 names(data)[names(data) == 'diff'] <- "pointDiff"
+```
 
+## Data
 
+For the 8th season of the Napoli Ballers Fantasy Football League, I figured I'd go back and run some numbers on the first 7 years of the league. I scraped this data from our [historical expanded standings](http://games.espn.com/ffl/tools/finalstandings?leagueId=725705&seasonId=2016). The raw data file is [here](https://github.com/twgardner2/NapoliBallers/blob/master/NapoliBallersHistory.xlsx). This is the data itself:
+
+```{r data, echo=FALSE}
+kable(data, table.attr = "id=\"rawdata\"")
 ```
 
 ## Owners
 
 TJ has done a good job of keeping Napoli Ballers alive since 2010 - especially since we are all spread across the globe, but I took a look at everyone who has been in the league:
 
-```{r owners}
+```{r owners, echo=FALSE}
 # Check owner names are unique
-table(data$owner, data$year)
+#table(data$owner, data$year)
 
-
+kable(data %>% 
+        group_by(owner) %>% 
+        summarize(count = n()) %>% 
+        arrange(desc(count), owner),
+        table.attr = "id=\"ownertable\"") #%>% 
+  #kable_styling(full_width = FALSE, position = "left") #bootstrap_options = "striped", 
 
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

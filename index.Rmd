@@ -24,10 +24,12 @@ output: html_document
                                       "stripeClasses": ['strip1', 'strip2']
                                    });
                                    
-            $("#ownertable").DataTable({"pageLength":50,
-                                        "bPaginate": false,
-                                        "stripeClasses": ['strip1', 'strip2']
-                                   });         
+            $("#ownertable").DataTable({"pageLength"     : 50,
+                                        "bPaginate"      : false,
+                                        "stripeClasses"  : ['strip1', 'strip2'],
+                                        "width"          : "25%"
+
+                                       });         
          } );
 </script>
 
@@ -45,11 +47,12 @@ library(knitr)
 # Read in raw data
 data <- readxl::read_xlsx("NapoliBallersHistory.xlsx")
 
-# Clean column names
+# Clean columns
 names(data) <- str_to_lower(names(data))
 names(data)[names(data) == 'pf/g'] <- "pfPerGame"
 names(data)[names(data) == 'pa/g'] <- "paPerGame"
 names(data)[names(data) == 'diff'] <- "pointDiff"
+data$year <- as.character(data$year)
 ```
 
 ## Data
@@ -65,16 +68,36 @@ kable(data, table.attr = "id=\"rawdata\"")
 TJ has done a good job of keeping Napoli Ballers alive since 2010 - especially since we are all spread across the globe, but I took a look at everyone who has been in the league:
 
 ```{r owners, echo=FALSE}
-# Check owner names are unique
-#table(data$owner, data$year)
+# Make owner participation table
+ownerTable <- data %>% 
+  group_by(owner) %>% 
+  summarize(count = n()) %>% 
+  arrange(desc(count), owner)
 
-kable(data %>% 
-        group_by(owner) %>% 
-        summarize(count = n()) %>% 
-        arrange(desc(count), owner),
-        table.attr = "id=\"ownertable\"") #%>% 
-  #kable_styling(full_width = FALSE, position = "left") #bootstrap_options = "striped", 
+# Find unique years and owners
+years <- unique(as.character(data$year))
+owners <- unique(data$owner)
+
+# Build ownerTable
+for (y in years) {
+  ownerTable[[y]] <- " " 
+}
+
+# Populate ownerTable
+for (col in 3:ncol(ownerTable)) {
+  for (row in 1:nrow(ownerTable)) {
+    years_compare <- unlist(data %>% filter(owner == as.character(ownerTable[row,1])) %>% select(year))
+    ownerTable[row,col] <- ifelse(  years[col-2] %in% unlist( years_compare ) ,"X"," ")
+  }
+}
+
+kable(ownerTable, # %>% 
+        # group_by(owner) %>% 
+        # summarize(count = n()) %>% 
+        # arrange(desc(count), owner),
+        table.attr = "id=\"ownertable\"")
 
 ```
+
 
 

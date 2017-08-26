@@ -1,0 +1,55 @@
+---
+title: "Napoli Ballers History"
+author: "Tom Gardner"
+date: "August 26, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(sjPlot)
+library(readxl)
+library(stringr)
+library(ggplot2)
+library(tidyverse)
+```
+
+## Data
+
+For the 8th season of the Napoli Ballers Fantasy Football League, I figured I'd go back and run some numbers on the first 7 years of the league. I scraped this data from our [historical expanded standings](http://games.espn.com/ffl/tools/finalstandings?leagueId=725705&seasonId=2016). The raw data file is [here](https://github.com/twgardner2/NapoliBallers/blob/master/NapoliBallersHistory.xlsx).
+
+```{r data}
+# Read in raw data
+data <- readxl::read_xlsx("NapoliBallersHistory.xlsx")
+
+# Clean column names
+names(data) <- str_to_lower(names(data))
+names(data)[names(data) == 'pf/g'] <- "pfPerGame"
+names(data)[names(data) == 'pa/g'] <- "paPerGame"
+names(data)[names(data) == 'diff'] <- "pointDiff"
+
+
+```
+
+## Owners
+
+TJ has done a good job of keeping Napoli Ballers alive since 2010 - especially since we are all spread across the globe, but I took a look at everyone who has been in the league:
+
+```{r owners}
+# Check owner names are unique
+table(data$owner, data$year)
+
+
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

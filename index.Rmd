@@ -27,9 +27,18 @@ output: html_document
             $("#ownertable").DataTable({"pageLength"     : 50,
                                         "bPaginate"      : false,
                                         "stripeClasses"  : ['strip1', 'strip2'],
+                                        "order"          : [[1, "desc"]],
                                         "width"          : "25%"
 
-                                       });         
+                                       });
+                                       
+            $("#performancetable").DataTable({"pageLength"     : 50,
+                                        "bPaginate"      : false,
+                                        "stripeClasses"  : ['strip1', 'strip2'],
+                                        "order"          : [[1, "desc"]],
+                                        "width"          : "25%"
+
+                                       });
          } );
 </script>
 
@@ -91,13 +100,32 @@ for (col in 3:ncol(ownerTable)) {
   }
 }
 
-kable(ownerTable, # %>% 
-        # group_by(owner) %>% 
-        # summarize(count = n()) %>% 
-        # arrange(desc(count), owner),
-        table.attr = "id=\"ownertable\"")
+kable(ownerTable, table.attr = "id=\"ownertable\"")
 
 ```
 
 
+## Medal Table
+Over the course of our league, Who has had the best results?:
 
+``` {r performance, echo=FALSE}
+# Summarize results
+rankTable <- data %>% count(owner, rank)  %>% filter(rank<=3)
+rankTable <- rankTable %>% spread(key = rank, value = n, fill = 0)
+newNames <- c("owner", "1st Place", "2nd Place", "3rd Place")
+colnames(rankTable) <- newNames
+
+winsTable <- data %>% group_by(owner) %>% summarize(Wins = sum(w), Losses = sum(l), Ties = sum(tie))  
+
+performanceTable <- full_join(rankTable, winsTable, by="owner") %>% mutate_all(funs(replace(., which(is.na(.)), 0)))
+
+kable(performanceTable, table.attr = "id=\"performancetable\"")
+
+```
+
+<br>
+If only I could quantify the amount of shit-talking that goes on and compare it to this table (I'm looking at you, Jake).
+
+<br>
+
+That's all I had time to look at so far, but I'd like to add pot winnings/penalties for sucking, and a few other things to this. Maybe it would be interesting to look at draft position vs. results in a given year.

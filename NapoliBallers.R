@@ -42,6 +42,14 @@ for (col in 3:ncol(ownerTable)) {
 
 
 
+# Summarize results
+rankTable <- data %>% count(owner, rank)  %>% filter(rank<=3)
+rankTable <- rankTable %>% spread(key = rank, value = n, fill = 0)
+newNames <- c("Owner", "1st Place", "2nd Place", "3rd Place")
+colnames(rankTable) <- newNames
+colnames(rankTable)
+
+# Wins/Losses/Ties table
 
 
 # paPlot <- ggplot(data, aes(x=pa))

@@ -8,6 +8,7 @@ output: html_document
 <link rel="stylesheet" type="text/css" href="http://cdn.datatables.net/1.10.5/css/jquery.dataTables.min.css">
 <script src="http://code.jquery.com/jquery-2.1.2.min.js"></script>
 <script src="http://cdn.datatables.net/1.10.5/js/jquery.dataTables.min.js"></script>
+<script src="http://d3js.org/d3.v4.min.js"></script>
 
 <style>
   table.dataTable tbody tr.strip1 {
@@ -100,6 +101,7 @@ for (col in 3:ncol(ownerTable)) {
   }
 }
 
+
 kable(ownerTable, table.attr = "id=\"ownertable\"")
 
 ```
@@ -129,3 +131,23 @@ If only I could quantify the amount of shit-talking that goes on and compare it 
 <br>
 
 That's all I had time to look at so far, but I'd like to add pot winnings/penalties for sucking, and a few other things to this. Maybe it would be interesting to look at draft position vs. results in a given year.
+
+<p style="background-color:pink; font-size:150%; color:blue"> Test inline HTML </p>
+
+<script>
+  d3.csv("data/circles.csv", dataViz);
+  
+  function dataViz(data) {
+    console.log(data);
+  }
+
+</script>
+
+
+``` {r points, echo=FALSE}
+# Points For plot
+pfData <- data %>% filter(!is.na(pfPerGame))
+pfPlot <- ggplot(pfData, aes(x=pfPerGame, fill=owner))
+pfPlot + geom_histogram(aes(color=factor(ifelse(rank==1,1,0)))) + scale_color_manual(values = c("black", "red"))
+
+```

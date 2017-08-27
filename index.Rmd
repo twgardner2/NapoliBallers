@@ -134,15 +134,6 @@ That's all I had time to look at so far, but I'd like to add pot winnings/penalt
 
 <p style="background-color:pink; font-size:150%; color:blue"> Test inline HTML </p>
 
-<script>
-  d3.csv("data/circles.csv", dataViz);
-  
-  function dataViz(data) {
-    console.log(data);
-  }
-
-</script>
-
 
 ``` {r points, echo=FALSE}
 # Points For plot
@@ -151,3 +142,53 @@ pfPlot <- ggplot(pfData, aes(x=pfPerGame, fill=owner))
 pfPlot + geom_histogram(aes(color=factor(ifelse(rank==1,1,0)))) + scale_color_manual(values = c("black", "red"))
 
 ```
+
+
+<div id="viz">
+  <svg style="width:1000px;height:500px;border:1px lightgray solid;" />
+</div>
+
+<!--- d3js Code --->
+<script>
+  d3.csv("data/circles.csv", dataViz);
+
+  var width = 1000;
+  var height = 500;
+
+  var sim = d3.forceSimulation()
+      .force("x", d3.forceX(150).strength(0.005));
+
+
+  function dataViz(data) {
+  
+    var circles = d3.select("svg")
+      .selectAll("g")
+      .data(data)
+      .enter()
+      .append("g")
+      .attr("transform", function(d) {
+          return "translate(" + d.x + "," + d.y + ")";
+          })
+      .on("mouseover", function(d) {
+        d3.select(this)
+          .append("text")
+          .attr("class", "labelText")
+          .text(d.id);
+        })
+      .on("mouseout", function(d) {
+        d3.selectAll(".labelText")
+          .remove();
+        });
+
+    circles.append("circle")
+         .attr("r", d => d.radius)
+         .attr("fill", d => d.fill)
+         .attr("stroke", "black")
+         .attr("stroke-width", "3px")
+         <!-- .attr("cx", d => 2*d.x) -->
+         <!-- .attr("cy", d => 2*d.y) -->
+         .attr("opacity", d => .7)
+
+	}
+
+</script>

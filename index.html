@@ -140,24 +140,20 @@ $(document).ready(function () {
          $(document).ready(function() {
              $("#rawdata").DataTable({"pageLength":10,
                                       "stripeClasses": ['strip1', 'strip2']
-                                   });
-                                   
+                                     });
             $("#ownertable").DataTable({"pageLength"     : 50,
                                         "bPaginate"      : false,
                                         "stripeClasses"  : ['strip1', 'strip2'],
                                         "order"          : [[1, "desc"]],
                                         "width"          : "25%"
-
                                        });
-                                       
             $("#performancetable").DataTable({"pageLength"     : 50,
-                                        "bPaginate"      : false,
-                                        "stripeClasses"  : ['strip1', 'strip2'],
-                                        "order"          : [[1, "desc"]],
-                                        "width"          : "25%"
-
-                                       });
-         } );
+                                              "bPaginate"      : false,
+                                              "stripeClasses"  : ['strip1', 'strip2'],
+                                              "order"          : [[1, "desc"]],
+                                              "width"          : "25%"
+                                             });
+         });
 </script>
 <div id="data" class="section level2">
 <h2>Data</h2>
@@ -5045,39 +5041,68 @@ Test inline HTML
   var sim = d3.forceSimulation()
       .force("x", d3.forceX(150).strength(0.005));
 
-
   function dataViz(data) {
-  
-    var circles = d3.select("svg")
+    
+    console.log(data);
+    
+    var groups = d3.select("svg")
       .selectAll("g")
       .data(data)
       .enter()
       .append("g")
+      .attr("class", "gCircle")
       .attr("transform", function(d) {
           return "translate(" + d.x + "," + d.y + ")";
-          })
-      .on("mouseover", function(d) {
-        d3.select(this)
-          .append("text")
-          .attr("class", "labelText")
-          .text(d.id);
-        })
-      .on("mouseout", function(d) {
-        d3.selectAll(".labelText")
-          .remove();
-        });
+          });
 
-    circles.append("circle")
+    groups.append("circle")
          .attr("r", d => d.radius)
          .attr("fill", d => d.fill)
          .attr("stroke", "black")
-         .attr("stroke-width", "3px")
-         <!-- .attr("cx", d => 2*d.x) -->
-         <!-- .attr("cy", d => 2*d.y) -->
-         .attr("opacity", d => .7)
-
+         .attr("stroke-width", "2px")
+         .attr("opacity", d => d.alpha)
+         .on("mouseover", mouseOverFunction)
+         .on("mouseout", mouseOutFunction);
     }
 
+    function mouseOverFunction(p) {
+
+      var child = d3.select(this);
+      
+      child.transition().duration(1500).attr("opacity", 1);
+      
+      var parent = child.select(function() {
+        var element = this;
+        while(!d3.select(element).classed("gCircle"))
+          element = element.parentElement;
+        return element;
+      });
+      
+      parent.raise().append("text").text(p.id).attr("transform", "translate(15, -15)");
+    }
+
+    function mouseOutFunction(p) {
+      
+      var child = d3.select(this);
+      
+      child.transition().duration(1500).attr("opacity", p => p.alpha);
+      
+      var parent = child.select(function() {
+        var element = this;
+        while(!d3.select(element).classed("gCircle"))
+          element = element.parentElement;
+        return element;
+      });
+      
+      parent.select("text").remove();
+      
+      <!-- d3.select(this) -->
+      <!--   .selectAll("circle") -->
+      <!--   .attr("opacity", p => p.alpha) -->
+      <!-- d3.selectAll(".labelText") -->
+      <!--   .remove(); -->
+    }
+    
 </script>
 </div>
 

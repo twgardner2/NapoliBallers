@@ -65,7 +65,7 @@ performanceTable <- full_join(rankTable, winsTable, by="owner") %>% mutate_all(f
 kable(performanceTable, table.attr = "id=\"performancetable\"")
 
 
-
+# Points For plot
 pfData <- data %>% filter(!is.na(pfPerGame))
 pfPlot <- ggplot(pfData, aes(x=pfPerGame, fill=owner))
 pfPlot + geom_histogram(aes(color=factor(ifelse(rank==1,1,0)))) + scale_color_manual(values = c("black", "red"))

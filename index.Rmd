@@ -8,7 +8,8 @@ output: html_document
 <link rel="stylesheet" type="text/css" href="http://cdn.datatables.net/1.10.5/css/jquery.dataTables.min.css">
 <script src="http://code.jquery.com/jquery-2.1.2.min.js"></script>
 <script src="http://cdn.datatables.net/1.10.5/js/jquery.dataTables.min.js"></script>
-<script src="http://d3js.org/d3.v4.min.js"></script>
+<script src="scripts/d3.min.js"></script>
+
  
 <style>
   table.dataTable tbody tr.strip1 {
@@ -41,7 +42,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-options(knitr.table.format = "html") 
+options(knitr.table.format = "html", self.contained=TRUE) 
 
 library(kableExtra)
 library(readxl)
@@ -49,6 +50,7 @@ library(stringr)
 library(ggplot2)
 library(tidyverse)
 library(knitr)
+library(jsonlite)
 
 # Read in raw data
 data <- readxl::read_xlsx("NapoliBallersHistory.xlsx")
@@ -118,8 +120,92 @@ performanceTable <- full_join(rankTable, winsTable, by="owner") %>% mutate_all(f
 kable(performanceTable, table.attr = "id=\"performancetable\"")
 ```
 
+
+
+
+
+
+``` {r medalStandJSON, echo=FALSE, results="asis"}
+#jsonData <- jsonlite::toJSON( data %>% filter(rank<=3) )
+#jsonData
+
+cat(
+  paste(
+  '<script>
+    var medalStandYears = ',toJSON(data %>% distinct(year)),';
+    var medalStandData = ',toJSON(data %>% filter(rank<=3)),';
+console.log(medalStandYears)    
+console.log(medalStandData);
+  </script>'
+  , sep="")
+)
+
+```
+
 <br>
-If only I could quantify the amount of shit-talking that goes on and compare it to this table (I'm looking at you, Jake).
+<br>
+  <select id="medalStandInput">
+  </select>
+<br>
+<div>
+  <svg id="medalTableViz" style="width:900px;height:350px;border:1px lightgray solid;" />
+
+  
+<div>
+
+<script> <!-- Set options for select input -->
+
+  d3.select("#medalStandInput")
+    .selectAll("option")
+    .data(medalStandYears)
+    .enter()
+    .append("option")
+    .attr("value", d => {return(d.year)})
+    .html(d => {return(d.year)});
+    
+
+</script>
+
+
+<script> <!--Build Medal Stand -->
+  var overallHeight = 300,
+      standHeights = [100, 150, 75],
+      standWidth = 250,
+      medalStandText = ["2nd Place", "1st Place", "3rd Place"];
+  
+  console.log(standHeights);
+  
+  d3.select("#medalTableViz")
+    .selectAll("g")
+    .data(standHeights)
+    .enter()
+    .append("g")
+    .attr("id", (d,i) => {return("place" + i)})
+    .attr("class", "medalStand")
+      .append("rect")
+      .attr("x", (d,i) => {return(standWidth*i)})
+      .attr("y", (d)   => {return(overallHeight-d)})
+      .attr("width", standWidth)
+      .attr("height", (d,i) => {return(d)})
+      .attr("fill", "#f0f0f0")
+      .attr("stroke", "black")
+      .attr("stroke-width", "2px");
+
+  d3.selectAll(".medalStand")
+    .append("text")
+    .attr("dx", (d,i) => {return(standWidth*(i+0.5))})
+    .attr("dy", (d)   => {return(overallHeight-10)})
+    .attr("text-anchor", "middle")
+    .attr("dominant-baseline", "central")
+    .attr("fill", "#4f442b")
+    .text((d,i) => {return(medalStandText[i])});
+        
+
+
+</script>
+
+<br>
+If only I could quantify the amount of smack talk that goes on and compare it to this table (I'm looking at you, Jake).
 
 <br>
 
@@ -136,80 +222,29 @@ pfPlot + geom_histogram(aes(color=factor(ifelse(rank==1,1,0)))) + scale_color_ma
 ```
 
 
-<div id="viz">
-  <svg style="width:1000px;height:500px;border:1px lightgray solid;"/>
-</div>
+
+
+<!-- <div id="viz"> -->
+<!--   <svg style="width:1000px;height:500px;border:1px lightgray solid;"/> -->
+<!-- </div> -->
 
 <!--- d3js Code --->
-<script>
-  d3.csv("data/circles.csv", dataViz);
+<!-- <script> -->
+<!--   console.log("the data is:"); -->
+<!--   console.log(data); -->
 
-  var width = 1000;
-  var height = 500;
+<!--   d3.csv("data/circles.csv", dataViz); -->
 
-  var sim = d3.forceSimulation()
-      .force("x", d3.forceX(150).strength(0.005));
+<!--   function dataViz(data) { -->
+<!--       console.log(data); -->
 
-  function dataViz(data) {
-    
-    console.log(data);
-    
-    var groups = d3.select("svg")
-      .selectAll("g")
-      .data(data)
-      .enter()
-      .append("g")
-      .attr("class", "gCircle")
-      .attr("transform", function(d) {
-          return "translate(" + d.x + "," + d.y + ")";
-          });
+<!--       d3.select("svg") -->
+<!--         .append("circle") -->
+<!--         .attr("r", 50) -->
+<!--         .attr("cx", 50) -->
+<!--         .attr("cy", 50) -->
+<!--         .attr("fill", "green") -->
+<!--         .attr("stroke", "black") -->
+<!--     } -->
 
-    groups.append("circle")
-         .attr("r", d => d.radius)
-         .attr("fill", d => d.fill)
-         .attr("stroke", "black")
-         .attr("stroke-width", "2px")
-         .attr("opacity", d => d.alpha)
-         .on("mouseover", mouseOverFunction)
-         .on("mouseout", mouseOutFunction);
-	}
-
-    function mouseOverFunction(p) {
-
-      var child = d3.select(this);
-      
-      child.transition().duration(1500).attr("opacity", 1);
-      
-      var parent = child.select(function() {
-        var element = this;
-        while(!d3.select(element).classed("gCircle"))
-          element = element.parentElement;
-        return element;
-      });
-      
-      parent.raise().append("text").text(p.id).attr("transform", "translate(15, -15)");
-    }
-
-    function mouseOutFunction(p) {
-      
-      var child = d3.select(this);
-      
-      child.transition().duration(1500).attr("opacity", p => p.alpha);
-      
-      var parent = child.select(function() {
-        var element = this;
-        while(!d3.select(element).classed("gCircle"))
-          element = element.parentElement;
-        return element;
-      });
-      
-      parent.select("text").remove();
-      
-      <!-- d3.select(this) -->
-      <!--   .selectAll("circle") -->
-      <!--   .attr("opacity", p => p.alpha) -->
-      <!-- d3.selectAll(".labelText") -->
-      <!--   .remove(); -->
-    }
-    
-</script>
+<!-- </script> -->

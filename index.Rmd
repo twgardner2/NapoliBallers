@@ -120,9 +120,18 @@ performanceTable <- full_join(rankTable, winsTable, by="owner") %>% mutate_all(f
 kable(performanceTable, table.attr = "id=\"performancetable\"")
 ```
 
+<br>
+If only I could quantify the amount of smack talk that goes on and compare it to this table (I'm looking at you, Jake).
 
+<br>
 
+That's all I've had time to look at so far, but I'd like to add pot winnings/penalties for sucking, and a few other things to this. Maybe it would be interesting to look at draft position vs. results in a given year.
 
+<br>
+
+Everything below this point is just stuff I'm working on and testing out:
+
+---
 
 
 ``` {r medalStandJSON, echo=FALSE, results="asis"}
@@ -204,12 +213,6 @@ console.log(medalStandData);
 
 </script>
 
-<br>
-If only I could quantify the amount of smack talk that goes on and compare it to this table (I'm looking at you, Jake).
-
-<br>
-
-That's all I had time to look at so far, but I'd like to add pot winnings/penalties for sucking, and a few other things to this. Maybe it would be interesting to look at draft position vs. results in a given year.
 
 <p style="background-color:pink; font-size:150%; color:blue"> Test inline HTML </p>
 
